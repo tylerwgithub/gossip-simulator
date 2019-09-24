@@ -11,7 +11,8 @@ defmodule Proj2.Messenger do
   
   When the counter for all messages in the map exceeds a certain value, the node converges.
   """
-  def init(), do: %{}
+  def init([]), do: %{}
+    # IO.inspect
   
   def tx_fn(msgs) do
     {msgs, Map.keys(msgs)}

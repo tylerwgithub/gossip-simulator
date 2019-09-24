@@ -34,33 +34,37 @@ defmodule Proj2.NetworkManager do
       }, restart: :temporary))
   end
   
-  def start_child(module, args \\ []) do
-    # IO.inspect module
-    start_child(apply(module, :init, args),
-	          &(apply(module, :tx_fn, [&1])),
-		      &(apply(module, :rcv_fn, [&1, &2])),
-			  &(apply(module, :mode_fn, [&1, &2, &3])))
-  end
+  # def start_child(module, args \\ []) do
+  #   IO.inspect module
+
+  #   start_child(apply(module, :init, args),
+	#           &(apply(module, :tx_fn, [&1])),
+	# 	      &(apply(module, :rcv_fn, [&1, &2])),
+	# 		  &(apply(module, :mode_fn, [&1, &2, &3])))
+  # end
   
   @doc """
   Starts multiple new GossipNodes under the NetworkManager.
   
   
   """
-  def start_children(data, tx_fn, rcv_fn, mode_fn) do
-  # IO.inspect tx_fn
-    data
-	  |> Enum.map(fn datum -> start_child(datum, tx_fn, rcv_fn, mode_fn) end)
-	  |> Enum.reduce({:ok, []}, fn {:ok, pid}, {:ok, pids} -> {:ok, pids ++ [pid]} end)
+  # def start_children(data, tx_fn, rcv_fn, mode_fn) do
+  # # IO.inspect tx_fn
+  #   data
+	#   |> Enum.map(fn datum -> start_child(datum, tx_fn, rcv_fn, mode_fn) end)
+	#   |> Enum.reduce({:ok, []}, fn {:ok, pid}, {:ok, pids} -> {:ok, pids ++ [pid]} end)
     
-  end
+  # end
   
   def start_children(module, args) do
-    data = Enum.map(args, &(apply(module, :init, &1)))
-    tx_fn = &(apply(module, :tx_fn, &1))
-    rcv_fn = &(apply(module, :rcv_fn, [&1, &2]))
-    mode_fn = &(apply(module, :mode_fn, [&1, &2, &3]))
-    start_children(data, tx_fn, rcv_fn, mode_fn)
+    # data = Enum.map(args, &module.init(&1))
+    tx = &module.tx_fn(&1)
+    rcv = &module.rcv_fn(&1, &2)
+    mode = &module.mode_fn(&1, &2, &3)
+    # start_children(data, tx, rcv, mode)
+    Enum.map(args, &module.init(&1))
+	  |> Enum.map(fn datum -> start_child(datum, tx, rcv, mode) end)
+	  |> Enum.reduce({:ok, []}, fn {:ok, pid}, {:ok, pids} -> {:ok, pids ++ [pid]} end)
 
     # start_children(Enum.map(args, &(apply(module, :init, &1))),
     #            &(apply(module, :tx_fn, [&1])),

@@ -41,6 +41,7 @@ defmodule Proj2.Observer do
   """
   @impl true
   def handle_call({:monitor, sup}, _from, state) do
+    # IO.inspect state
     {:reply, :ok, Map.put(state, :pids,
       DynamicSupervisor.which_children(sup)
 	    |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
