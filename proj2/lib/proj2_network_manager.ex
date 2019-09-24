@@ -35,6 +35,7 @@ defmodule Proj2.NetworkManager do
   end
   
   def start_child(module, args \\ []) do
+    # IO.inspect module
     start_child(apply(module, :init, args),
 	          &(apply(module, :tx_fn, [&1])),
 		      &(apply(module, :rcv_fn, [&1, &2])),
@@ -47,17 +48,24 @@ defmodule Proj2.NetworkManager do
   
   """
   def start_children(data, tx_fn, rcv_fn, mode_fn) do
+  # IO.inspect tx_fn
     data
 	  |> Enum.map(fn datum -> start_child(datum, tx_fn, rcv_fn, mode_fn) end)
 	  |> Enum.reduce({:ok, []}, fn {:ok, pid}, {:ok, pids} -> {:ok, pids ++ [pid]} end)
+    
   end
   
   def start_children(module, args) do
-    IO.inspect module
-    start_children(Enum.map(args, &(apply(module, :init, &1))),
-	             &(apply(module, :tx_fn, [&1])),
-		         &(apply(module, :rcv_fn, [&1, &2])),
-			     &(apply(module, :mode_fn, [&1, &2, &3])))
+    data = Enum.map(args, &(apply(module, :init, &1)))
+    tx_fn = &(apply(module, :tx_fn, &1))
+    rcv_fn = &(apply(module, :rcv_fn, [&1, &2]))
+    mode_fn = &(apply(module, :mode_fn, [&1, &2, &3]))
+    start_children(data, tx_fn, rcv_fn, mode_fn)
+
+    # start_children(Enum.map(args, &(apply(module, :init, &1))),
+    #            &(apply(module, :tx_fn, [&1])),
+		#          &(apply(module, :rcv_fn, [&1, &2])),
+		# 	     &(apply(module, :mode_fn, [&1, &2, &3])))
     
   end
   
@@ -69,11 +77,13 @@ defmodule Proj2.NetworkManager do
     - topology_fn: Function which is invoked on the list of active GossipNodes and returns a list of tuples in the form {node, [neighbors]}
   """
   def set_network(topology_fn) do
+    # IO.inspect DynamicSupervisor.which_children(__MODULE__)
     DynamicSupervisor.which_children(__MODULE__)
 	  |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
 	  |> topology_fn.()
 	  |> Task.async_stream(fn {node, neighbors} -> Node.update(node, :neighbors, fn _ -> neighbors end) end)
 	  |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
+    # IO.inspect 
   end
   
   def reset(module, data) do
