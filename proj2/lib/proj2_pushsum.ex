@@ -15,8 +15,9 @@ defmodule Proj2.PushSum do
   
   To prevent nodes from converging before receiving any messages, set the intial ratio to any value other than the actual starting v/w ratio.
   """
+  #TY
   def init([v], w \\ 1, r \\ 0) do
-  IO.inspect v
+  # IO.inspect v
   {v, w, r, 0} 
   end 
 

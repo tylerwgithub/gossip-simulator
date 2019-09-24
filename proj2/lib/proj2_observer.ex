@@ -10,8 +10,10 @@ defmodule Proj2.Observer do
   @doc """
   Starting and linking the GenServer process.
   Initializing a node in the network.
-  The state holds three elements: the convergence number, number of received messages
-  at the start and the neighbors of a node.
+  The state holds three elements: 
+  the convergence number, 
+  number of received messages at the start 
+  and the neighbors of a node.
   """
   def start_link(from) do
     GenServer.start_link(__MODULE__, from, name: __MODULE__)
@@ -40,12 +42,14 @@ defmodule Proj2.Observer do
   Handle request to monitor network, and initialize mapping of node states.
   """
   @impl true
-  def handle_call({:monitor, sup}, _from, state) do
-    # IO.inspect state
-    {:reply, :ok, Map.put(state, :pids,
-      DynamicSupervisor.which_children(sup)
-	    |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
-	    |> Map.new(fn pid -> {pid, :ok} end))}
+  # TY
+  def handle_call({:monitor, sup}, _from, state) do 
+    {:reply, :ok, Map.put(state, :pids, DynamicSupervisor.which_children(sup)
+      |> Map.new(fn {:undefined, pid, _type, _modules} -> {pid, :ok} end))}
+    # {:reply, :ok, Map.put(state, :pids,
+    #   DynamicSupervisor.which_children(sup)
+	  #   |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
+	  #   |> Map.new(fn pid -> {pid, :ok} end))}
   end
   
   @doc """

@@ -9,10 +9,14 @@ defmodule Proj2.Topology do
   @doc """
   Defines a fully-connected network, where each node is a neighbor of every other node.
   """
+  #TY
   def full(nodes) do
-    nodes
-	  |> Enum.map_reduce({[], tl(nodes)}, fn node, {head, tail} -> {{node, head ++ tail}, {[node] ++ head, Enum.drop(tail, 1)}} end)
-	  |> elem(0)
+    # IO.inspect nodes
+    nodes |> Enum.map(fn x -> {x, nodes -- [x]} end)
+    # topo = nodes
+	  # |> Enum.map_reduce({[], tl(nodes)}, fn node, {head, tail} -> {{node, head ++ tail}, {[node] ++ head, Enum.drop(tail, 1)}} end)
+	  # |> elem(0)
+    # IO.inspect
   end
 
 

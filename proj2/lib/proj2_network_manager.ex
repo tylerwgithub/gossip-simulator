@@ -55,7 +55,7 @@ defmodule Proj2.NetworkManager do
 	#   |> Enum.reduce({:ok, []}, fn {:ok, pid}, {:ok, pids} -> {:ok, pids ++ [pid]} end)
     
   # end
-  
+  #TY
   def start_children(module, args) do
     # data = Enum.map(args, &module.init(&1))
     tx = &module.tx_fn(&1)
@@ -80,14 +80,16 @@ defmodule Proj2.NetworkManager do
     - sup:         PID of the NetworkManager
     - topology_fn: Function which is invoked on the list of active GossipNodes and returns a list of tuples in the form {node, [neighbors]}
   """
+  #TY
   def set_network(topology_fn) do
     # IO.inspect DynamicSupervisor.which_children(__MODULE__)
-    DynamicSupervisor.which_children(__MODULE__)
+    [head | _] = DynamicSupervisor.which_children(__MODULE__)
 	  |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
 	  |> topology_fn.()
 	  |> Task.async_stream(fn {node, neighbors} -> Node.update(node, :neighbors, fn _ -> neighbors end) end)
-	  |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
-    # IO.inspect 
+	  |> Enum.map(fn _ -> :ok end)
+    head
+    # |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
   end
   
   def reset(module, data) do
