@@ -11,12 +11,18 @@ defmodule Proj2 do
       case topology do
         "full"   -> &Proj2.Topology.full/1
         "3D"     -> &(Proj2.Topology.grid(&1, 3))
+        "2D"     -> &(Proj2.Topology.grid(&1, 2))
         "rand2D" -> &(Proj2.Topology.proximity(&1, 2, 0.1))
         "sphere" -> &(Proj2.Topology.grid(&1, 2, :true))
         "line"   -> &(Proj2.Topology.grid(&1, 1))
         "imp2D"  -> &(Proj2.Topology.grid(&1, 1, :false, :true))
+        "honeycomb" -> &(Proj2.Topology.honey(&1, 2))
+        "randhoneycomb" -> &(Proj2.Topology.honeyrand(&1, 2))
       end)
+
+    # IO.inspect nodes
     Proj2.GossipNode.gossip(Enum.random(nodes), [:hello])
+    # IO.inspect Enum.random(nodes)
 	receive do
       {:converged, _data, sent} -> {:ok, sent}
       :timeout -> :timeout
@@ -28,10 +34,13 @@ defmodule Proj2 do
       case topology do
         "full"   -> &Proj2.Topology.full/1
         "3D"     -> &(Proj2.Topology.grid(&1, 3))
+        "2D"     -> &(Proj2.Topology.grid(&1, 2))
         "rand2D" -> &(Proj2.Topology.proximity(&1, 2, 0.1))
         "sphere" -> &(Proj2.Topology.grid(&1, 2, :true))
         "line"   -> &(Proj2.Topology.grid(&1, 1))
         "imp2D"  -> &(Proj2.Topology.grid(&1, 1, :false, :true))
+        "honeycomb" -> &(Proj2.Topology.honey(&1, 2))
+        "randhoneycomb" -> &(Proj2.Topology.honeyrand(&1, 2))
       end)
     Proj2.GossipNode.transmit(Enum.random(nodes))
 	receive do

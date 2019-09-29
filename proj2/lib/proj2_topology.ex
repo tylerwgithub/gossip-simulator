@@ -51,6 +51,8 @@ defmodule Proj2.Topology do
     - rand: Flag to indicate if random pairwise connections should be added to the grid. Defaults to :false.
   """
   def grid(nodes, d, mod \\ :false, rand \\ :false) do
+  # IO.inspect calc_dimensions(length(nodes), d)
+  IO.inspect Enum.reverse(calc_dimensions(length(nodes), d))
 	randomize(
 	  connect_grid(
 	    add_neighbors(nodes),
@@ -59,6 +61,15 @@ defmodule Proj2.Topology do
 	  rand)
   end
   
+  def honey(nodes, d, mod \\ :false, rand \\ :false) do
+    grid(nodes, d, mod, rand)
+    |> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
+  end
+
+  def honeyrand(nodes, d, mod \\ :false, rand \\ :false) do
+    honey(nodes, d, mod, rand)
+    |> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
+  end
   ## Helper functions
   
   defp add_neighbors(nodes), do: Enum.map(nodes, &({&1, []}))
@@ -115,6 +126,10 @@ defmodule Proj2.Topology do
   defp connect_grid(space, dims, _mod) when length(dims) == 0, do: space
   
   defp connect_grid(space, dims, mod) do
+    # IO.inspect space
+	  # |> Enum.chunk_every(hd(dims))
+    # |> Enum.map(&(connect_line(&1, mod)))
+    # |> list_pivot()
     space
 	  |> Enum.chunk_every(hd(dims))
 	  |> Enum.map(&(connect_line(&1, mod)))
@@ -130,6 +145,7 @@ defmodule Proj2.Topology do
   end
   
   defp connect_line(nodes, mod) do
+    # IO.inspect nodes
     nodes
       |> Enum.map_reduce(
 	       (if mod do 
