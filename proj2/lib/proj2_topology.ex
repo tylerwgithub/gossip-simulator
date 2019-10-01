@@ -30,14 +30,14 @@ defmodule Proj2.Topology do
               - uniform: Uniform random distribution (default).
               - equal:   Equidistant (non-random) distribution.
   """
-  def proximity(nodes, d, r, dist \\ :uniform) do
+  def proximity(nodes, dimension, radius) do
     nodes
 	  |> add_neighbors()
-	  |> Enum.zip(get_coords(length(nodes), d, dist))
+	  |> Enum.zip(get_coords(length(nodes), dimension))
 	  |> Enum.sort(&(hd(elem(&1, 1)) <= hd(elem(&2, 1))))
-	  |> find_nearby(r)
+	  |> find_nearby(radius)
 	  |> Enum.reverse()
-	  |> find_nearby(r)
+	  |> find_nearby(radius)
 	  |> Enum.map(&(elem(&1, 0)))
   end
 
@@ -65,66 +65,47 @@ defmodule Proj2.Topology do
 	  end
   end
 
-  
-  def honey(nodes, _mod \\ :false, _rand \\ :false) do
+  def honeycomb(nodes) do
     side = round(:math.sqrt(nodes))
-    IO.puts side
     side = if rem(side, 2) == 0, do: side + 1, else: side
-    IO.puts side
     side 
     |> get_NbyNcoords(side, side)
     #|> Enum.map(fn row -> connect_line(row, :false) end)
     |> Enum.map(fn row -> 
       Enum.map(row, fn {x, y} -> 
         if (rem(x,2) == 0) do
-          {x, y ++ [(if x-1 > 0 and rem(x, side) > 1, do: x-1),
+          {x, [(if x-1 > 0 and rem(x, side) > 1, do: x-1),
                     (if x+side <= side*side, do: x+side),
-                    (if x-side > 0, do: x-side)]}
+                    (if x-side > 0, do: x-side)] ++ y}
         else 
-          {x, y ++ [(if rem(x, side) > 0, do: x+1),
+          {x, [(if rem(x, side) > 0, do: x+1),
                     (if x+side <= side*side, do: x+side),
-                    (if x-side > 0, do: x-side)]}
+                    (if x-side > 0, do: x-side)] ++ y}
           #{x, y ++ [x+1, x+5, x-5]}
         end
         end)
       end)
       |> Enum.flat_map(fn x -> x end)
       |> Enum.map(fn {x, y} -> {x, y -- [nil, nil, nil]} end)
-    
-    # for i <- 1..matrix.map_size() do
-    #   for j <- 1..
-    # for i <- 1..matrix.length do
-    #   for j <- 1.matrix[i].length, do:
-    #|> Enum.each(fn nodes -> connect_line(nodes, :false) end)
-    #|> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
   end
 
-  # def honeyrand(nodes, mod \\ :false, rand \\ :false) do
-  #   honey(nodes, mod, rand)
-  #   |> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
-  # end
+  def randhoneycomb(nodes) do
+    nodes
+    |> honeycomb()
+    |> Enum.map(fn {x, y} -> {x, [:rand.uniform(nodes)] ++ y} end)
+  end
   ## Helper functions
   
   defp add_neighbors(nodes), do: Enum.map(nodes, &({&1, []}))
   
   defp strip_neighbors(nodes), do: Enum.map(nodes, &(elem(&1, 0)))
   
-  defp get_coords(n, d, :uniform) do
+  defp get_coords(n, d) do
     for _ <- 1..n do
 	    for _ <- 1..d, do: :rand.uniform()
 	end
   end
-  
-  defp get_coords(n, d, :equal), do: get_coords([[]], n, calc_dimensions(n, d))
-  
-  defp get_coords(list, _n, []), do: list
-  
-  defp get_coords(list, n, [d | d2]) do
-    (for x <- 0..d-1, do: x/(d-1))
-	  |> Enum.flat_map(&(for y <- list, do: [&1] ++ y))
-	  |> get_coords(n, d2)
-  end
-  
+
   defp find_nearby(nodes, r) do
     Enum.map_reduce(nodes, tl(nodes), fn {{node, neighbors}, x}, tail ->
 	  {{{node,
@@ -224,7 +205,7 @@ defmodule Proj2.Topology do
 
   def test do
     #IO.inspect honey([{1, []}, {2, []}, {3, []}, {4, []}], :false)
-    IO.inspect honey(36)
+    IO.inspect proximity([1, 2, 3, 4, 5], 2, 0.5)
     #IO.inspect connect_line([{1, []}, {2, []}, {3, []}, {4, []}], :false)
     #IO.inspect honey([1,2,3,4,5], :false)
   end

@@ -16,8 +16,8 @@ defmodule Proj2 do
         "sphere" -> &(Proj2.Topology.grid(&1, 2, :true))
         "line"   -> &(Proj2.Topology.grid(&1, 1))
         "imp2D"  -> &(Proj2.Topology.grid(&1, 1, :false, :true))
-        "honeycomb" -> &(Proj2.Topology.honey(&1, 2))
-        "randhoneycomb" -> &(Proj2.Topology.honeyrand(&1, 2))
+        "honeycomb" -> &(Proj2.Topology.honeycomb(&1))
+        "randhoneycomb" -> &(Proj2.Topology.randhoneycomb(&1))
       end)
 
     # IO.inspect nodes
