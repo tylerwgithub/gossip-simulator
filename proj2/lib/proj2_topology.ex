@@ -51,8 +51,6 @@ defmodule Proj2.Topology do
     - rand: Flag to indicate if random pairwise connections should be added to the grid. Defaults to :false.
   """
   def grid(nodes, d, mod \\ :false, rand \\ :false) do
-  # IO.inspect calc_dimensions(length(nodes), d)
-  IO.inspect Enum.reverse(calc_dimensions(length(nodes), d))
 	randomize(
 	  connect_grid(
 	    add_neighbors(nodes),
@@ -60,16 +58,51 @@ defmodule Proj2.Topology do
 	    mod),
 	  rand)
   end
-  
-  def honey(nodes, d, mod \\ :false, rand \\ :false) do
-    grid(nodes, d, mod, rand)
-    |> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
+
+  defp get_NbyNcoords(n, d, numNodes) do
+    for i <- 1..n do
+	    for j <- 1..d, do: {((i-1)*numNodes + j), []}
+	  end
   end
 
-  def honeyrand(nodes, d, mod \\ :false, rand \\ :false) do
-    honey(nodes, d, mod, rand)
-    |> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
+  
+  def honey(nodes, _mod \\ :false, _rand \\ :false) do
+    side = round(:math.sqrt(nodes))
+    IO.puts side
+    side = if rem(side, 2) == 0, do: side + 1, else: side
+    IO.puts side
+    side 
+    |> get_NbyNcoords(side, side)
+    #|> Enum.map(fn row -> connect_line(row, :false) end)
+    |> Enum.map(fn row -> 
+      Enum.map(row, fn {x, y} -> 
+        if (rem(x,2) == 0) do
+          {x, y ++ [(if x-1 > 0 and rem(x, side) > 1, do: x-1),
+                    (if x+side <= side*side, do: x+side),
+                    (if x-side > 0, do: x-side)]}
+        else 
+          {x, y ++ [(if rem(x, side) > 0, do: x+1),
+                    (if x+side <= side*side, do: x+side),
+                    (if x-side > 0, do: x-side)]}
+          #{x, y ++ [x+1, x+5, x-5]}
+        end
+        end)
+      end)
+      |> Enum.flat_map(fn x -> x end)
+      |> Enum.map(fn {x, y} -> {x, y -- [nil, nil, nil]} end)
+    
+    # for i <- 1..matrix.map_size() do
+    #   for j <- 1..
+    # for i <- 1..matrix.length do
+    #   for j <- 1.matrix[i].length, do:
+    #|> Enum.each(fn nodes -> connect_line(nodes, :false) end)
+    #|> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
   end
+
+  # def honeyrand(nodes, mod \\ :false, rand \\ :false) do
+  #   honey(nodes, mod, rand)
+  #   |> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
+  # end
   ## Helper functions
   
   defp add_neighbors(nodes), do: Enum.map(nodes, &({&1, []}))
@@ -78,7 +111,7 @@ defmodule Proj2.Topology do
   
   defp get_coords(n, d, :uniform) do
     for _ <- 1..n do
-	  for _ <- 1..d, do: :rand.uniform()
+	    for _ <- 1..d, do: :rand.uniform()
 	end
   end
   
@@ -126,10 +159,6 @@ defmodule Proj2.Topology do
   defp connect_grid(space, dims, _mod) when length(dims) == 0, do: space
   
   defp connect_grid(space, dims, mod) do
-    # IO.inspect space
-	  # |> Enum.chunk_every(hd(dims))
-    # |> Enum.map(&(connect_line(&1, mod)))
-    # |> list_pivot()
     space
 	  |> Enum.chunk_every(hd(dims))
 	  |> Enum.map(&(connect_line(&1, mod)))
@@ -145,19 +174,17 @@ defmodule Proj2.Topology do
   end
   
   defp connect_line(nodes, mod) do
-    # IO.inspect nodes
     nodes
-      |> Enum.map_reduce(
-	       (if mod do 
-		     {[elem(List.last(nodes), 0)], strip_neighbors(tl(nodes) ++ [hd(nodes)])}
-		   else
-			 {[], strip_neighbors(tl(nodes))}
-		   end),
-		   fn {node, neighbors}, {left, tail} ->
-	         {{node,
-	           left ++ Enum.take(tail, 1) ++ neighbors},
-	         {[node], Enum.drop(tail, 1)}}
-		   end)
+    |> Enum.map_reduce(
+      (if mod do
+        {[elem(List.last(nodes), 0)], strip_neighbors(tl(nodes) ++ [hd(nodes)])}
+        else
+        {[], strip_neighbors(tl(nodes))}
+        end),
+      fn {node, neighbors}, {left, tail} ->
+        {{node, left ++ Enum.take(tail, 1) ++ neighbors}, 
+        {[node], Enum.drop(tail, 1)}}
+      end)
 	  |> elem(0)
   end
   
@@ -165,7 +192,7 @@ defmodule Proj2.Topology do
     lists
       |> Enum.reduce(List.duplicate([], length(hd(lists))), fn list, zipper ->
 	       Enum.map_reduce(zipper, list, &({&1 ++ Enum.take(&2, 1), Enum.drop(&2, 1)}))
-		     |> elem(0)
+		  |> elem(0)
 		 end)
   end
   
@@ -195,4 +222,13 @@ defmodule Proj2.Topology do
 	end
   end
 
+  def test do
+    #IO.inspect honey([{1, []}, {2, []}, {3, []}, {4, []}], :false)
+    IO.inspect honey(36)
+    #IO.inspect connect_line([{1, []}, {2, []}, {3, []}, {4, []}], :false)
+    #IO.inspect honey([1,2,3,4,5], :false)
+  end
+
 end
+
+Proj2.Topology.test()
