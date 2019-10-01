@@ -102,7 +102,9 @@ defmodule Proj2.GossipNode do
     {:reply, :ok, Enum.reduce(key_fun, state, &(Map.update!(&2, elem(&1, 0), elem(&1, 1))))}
   end
   
-  def handle_call({:update, key, fun}, _from, state), do: {:reply, :ok, Map.update!(state, key, fun)}
+  def handle_call({:update, key, fun}, _from, state) do
+   {:reply, :ok, Map.update!(state, key, fun)}
+  end
   
   @doc """
   Handle requests to transmit state to a neighbor.

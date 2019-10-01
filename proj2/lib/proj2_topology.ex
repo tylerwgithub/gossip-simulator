@@ -30,9 +30,9 @@ defmodule Proj2.Topology do
               - uniform: Uniform random distribution (default).
               - equal:   Equidistant (non-random) distribution.
   """
-  def proximity(nodes, dimension, radius) do
+  def rand2d(nodes, dimension, radius) do
     nodes
-	  |> add_neighbors()
+	  |> add_edges()
 	  |> Enum.zip(get_coords(length(nodes), dimension))
 	  |> Enum.sort(&(hd(elem(&1, 1)) <= hd(elem(&2, 1))))
 	  |> find_nearby(radius)
@@ -40,6 +40,8 @@ defmodule Proj2.Topology do
 	  |> find_nearby(radius)
 	  |> Enum.map(&(elem(&1, 0)))
   end
+
+  
 
   @doc """
   Defines an orthogonal grid network in d dimensions.
@@ -50,13 +52,13 @@ defmodule Proj2.Topology do
     - mod:  Flag to indicate if dimensions are circular i.e. they wrap around. Defaults to :false.
     - rand: Flag to indicate if random pairwise connections should be added to the grid. Defaults to :false.
   """
-  def grid(nodes, d, mod \\ :false, rand \\ :false) do
+  def grid(nodes, d, mod \\ :false) do
 	randomize(
 	  connect_grid(
-	    add_neighbors(nodes),
+	    add_edges(nodes),
 	    Enum.reverse(calc_dimensions(length(nodes), d)),
 	    mod),
-	  rand)
+	  :false)
   end
 
   defp get_NbyNcoords(n, d, numNodes) do
@@ -66,9 +68,113 @@ defmodule Proj2.Topology do
   end
 
   def honeycomb(nodes) do
-    side = round(:math.sqrt(nodes))
+    IO.inspect nodes
+    side = ceil(:math.sqrt(length(nodes)))
     side = if rem(side, 2) == 0, do: side + 1, else: side
-    side 
+
+    adjacencyList = honeycombUtil(side * side)
+    ret = Enum.fetch(nodes, 2)
+    case ret do
+     {:ok, pid} -> IO.inspect pid
+     _ -> 
+     end
+    Enum.map(adjacencyList, fn {node, list} -> 
+        {
+        case Enum.fetch(nodes, node-1) do
+        {:ok, pid} -> pid
+        _ -> nil
+        end,
+        Enum.reduce(list, [], fn item, acc -> 
+          case Enum.fetch(nodes, item-1) do
+          {:ok, pidNeighbor} -> [pidNeighbor] ++ acc
+          _ -> acc
+          end
+        end)
+        }
+      end)
+      |> Enum.filter(fn {pid, _} -> pid != nil end)
+  end
+
+  def randhoneycomb(nodes) do
+    IO.inspect nodes
+    side = ceil(:math.sqrt(length(nodes)))
+    side = if rem(side, 2) == 0, do: side + 1, else: side
+
+    adjacencyList = 
+    honeycombUtil(side * side) |>
+    Enum.map(fn {x, y} -> {x, [Enum.random(1..length(nodes))] ++ y} end)
+
+    Enum.map(adjacencyList, fn {node, list} -> 
+        {
+        case Enum.fetch(nodes, node-1) do
+        {:ok, pid} -> pid
+        _ -> nil
+        end,
+        Enum.reduce(list, [], fn item, acc -> 
+          case Enum.fetch(nodes, item-1) do
+          {:ok, pidNeighbor} -> [pidNeighbor] ++ acc
+          _ -> acc
+          end
+        end)
+        }
+      end)
+      |> Enum.filter(fn {pid, _} -> pid != nil end)
+  end
+
+  def honeycomb2(nodes) do
+  side = ceil(:math.sqrt(length(nodes)))
+  side = if rem(side, 2) == 0, do: side + 1, else: side
+    listNodes = nodes 
+    |> add_edges()
+    |> Enum.zip(1..length(nodes))
+    #|> Enum.chunk_every(side)
+    
+    Enum.map(listNodes, fn {{node, neighbors}, x} -> 
+          if (rem(x,2) == 0) do
+            ret = Enum.fetch(listNodes, x-1)
+            case ret do
+              {:ok, {{addNeighbor, _}, _}} -> {{node, [addNeighbor] ++ neighbors}, x}
+              _ ->
+            end
+          else
+            ret = Enum.fetch(listNodes, x+1)
+            case ret do
+              {:ok, {{addNeighbor, _}, _}} -> {{node, [addNeighbor] ++ neighbors}, x}
+              _ ->
+            end
+          end
+          ret = Enum.fetch(listNodes, x-5)
+          case ret do
+            {:ok, {{addNeighbor, _}, _}} -> {{node, [addNeighbor] ++ neighbors}, x}
+            _ ->
+          end
+          ret = Enum.fetch(listNodes, x+5)
+          case ret do
+            {:ok, {{addNeighbor, _}, _}} -> {{node, [addNeighbor] ++ neighbors}, x}
+            _ ->
+          end
+          
+         
+         end)
+    #|> Enum.unzip()
+    |> IO.inspect
+    #     else 
+    #       {x, [(if rem(x, side) > 0, do: x+1),
+    #                 (if x+side <= side*side, do: x+side),
+    #                 (if x-side > 0, do: x-side)] ++ y}
+    #       #{x, y ++ [x+1, x+5, x-5]}
+    #     end
+    #     end)
+    #   end)
+    #|> Enum.map(&(elem(&1, 0)))
+    # |> Enum.flat_map(fn x -> x end)
+    # |> Enum.map(fn {x, y} -> {x, y -- [nil, nil, nil]} end)
+    end
+
+  def honeycombUtil(nodes) do
+    side = ceil(:math.sqrt(nodes))
+    side = if rem(side, 2) == 0, do: side + 1, else: side
+    side
     |> get_NbyNcoords(side, side)
     #|> Enum.map(fn row -> connect_line(row, :false) end)
     |> Enum.map(fn row -> 
@@ -89,21 +195,21 @@ defmodule Proj2.Topology do
       |> Enum.map(fn {x, y} -> {x, y -- [nil, nil, nil]} end)
   end
 
-  def randhoneycomb(nodes) do
+  def randhoneycomb2(nodes) do
     nodes
     |> honeycomb()
-    |> Enum.map(fn {x, y} -> {x, [:rand.uniform(nodes)] ++ y} end)
+    |> Enum.map(fn {x, y} -> {x, [Enum.random(nodes)] ++ y} end)
   end
   ## Helper functions
   
-  defp add_neighbors(nodes), do: Enum.map(nodes, &({&1, []}))
+  defp add_edges(nodes), do: Enum.map(nodes, &({&1, []}))
   
-  defp strip_neighbors(nodes), do: Enum.map(nodes, &(elem(&1, 0)))
+  defp remove_edges(nodes), do: Enum.map(nodes, &(elem(&1, 0)))
   
   defp get_coords(n, d) do
     for _ <- 1..n do
 	    for _ <- 1..d, do: :rand.uniform()
-	end
+	  end
   end
 
   defp find_nearby(nodes, r) do
@@ -158,9 +264,9 @@ defmodule Proj2.Topology do
     nodes
     |> Enum.map_reduce(
       (if mod do
-        {[elem(List.last(nodes), 0)], strip_neighbors(tl(nodes) ++ [hd(nodes)])}
+        {[elem(List.last(nodes), 0)], remove_edges(tl(nodes) ++ [hd(nodes)])}
         else
-        {[], strip_neighbors(tl(nodes))}
+        {[], remove_edges(tl(nodes))}
         end),
       fn {node, neighbors}, {left, tail} ->
         {{node, left ++ Enum.take(tail, 1) ++ neighbors}, 
@@ -205,11 +311,13 @@ defmodule Proj2.Topology do
 
   def test do
     #IO.inspect honey([{1, []}, {2, []}, {3, []}, {4, []}], :false)
-    IO.inspect proximity([1, 2, 3, 4, 5], 2, 0.5)
+    #IO.inspect rand2d([1, 2, 3, 4, 5], 2, 0.5)
     #IO.inspect connect_line([{1, []}, {2, []}, {3, []}, {4, []}], :false)
-    #IO.inspect honey([1,2,3,4,5], :false)
+    IO.inspect honeycomb([1,2,3,4,5])
+    # IO.inspect full([1,2,3,4,5])
+    # IO.inspect grid([1,2,3,4,5], 1)
+    #IO.inspect Enum.chunk_every([1,2,3,4,5,6,1], 2)
   end
-
 end
 
-Proj2.Topology.test()
+#Proj2.Topology.test()

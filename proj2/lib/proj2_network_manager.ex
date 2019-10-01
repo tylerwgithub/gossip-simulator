@@ -64,7 +64,7 @@ defmodule Proj2.NetworkManager do
     # start_children(data, tx, rcv, mode)
     Enum.map(args, &module.init(&1))
 	  |> Enum.map(fn datum -> start_child(datum, tx, rcv, mode) end)
-	  |> Enum.reduce({:ok, []}, fn {:ok, pid}, {:ok, pids} -> {:ok, pids ++ [pid]} end)
+	  |> Enum.reduce({:ok, []}, fn {:ok, pid}, {:ok, pids} -> {:ok, [pid] ++ pids} end)
 
     # start_children(Enum.map(args, &(apply(module, :init, &1))),
     #            &(apply(module, :tx_fn, [&1])),
@@ -82,7 +82,6 @@ defmodule Proj2.NetworkManager do
   """
   #TY
   def set_network(topology_fn) do
-    # IO.inspect DynamicSupervisor.which_children(__MODULE__)
     [head | _] = DynamicSupervisor.which_children(__MODULE__)
 	  |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
 	  |> topology_fn.()

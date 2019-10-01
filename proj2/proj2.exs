@@ -8,7 +8,7 @@ Proj2.Observer.start_link(self())
 {:ok, nodes} =
   case algorithm do
     "gossip"   -> Proj2.NetworkManager.start_children(Proj2.Messenger, List.duplicate([], numNodes))
-	"push-sum" -> Proj2.NetworkManager.start_children(Proj2.PushSum, (for n <- 1..numNodes, do: [n]))
+	  "push-sum" -> Proj2.NetworkManager.start_children(Proj2.PushSum, (for n <- 1..numNodes, do: [n]))
   end
 :ok = Proj2.Observer.monitor_network(Proj2.NetworkManager)
 
