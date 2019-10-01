@@ -1,0 +1,9 @@
+{application,my_program,
+             [{applications,[kernel,stdlib,elixir,logger]},
+              {description,"my_program"},
+              {modules,['Elixir.My_program','Elixir.Proj2',
+                        'Elixir.Proj2.GossipNode','Elixir.Proj2.Messenger',
+                        'Elixir.Proj2.NetworkManager','Elixir.Proj2.Observer',
+                        'Elixir.Proj2.PushSum','Elixir.Proj2.Topology']},
+              {registered,[]},
+              {vsn,"0.1.0"}]}.

@@ -3,12 +3,17 @@ defmodule Proj2.MixProject do
 
   def project do
     [
-      app: :proj2,
+      app: :my_program,
       version: "0.1.0",
+      escript: escript(),
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
+  end
+
+  defp escript do
+    [main_module: My_program]
   end
 
   # Run "mix help compile.app" to learn about applications.
