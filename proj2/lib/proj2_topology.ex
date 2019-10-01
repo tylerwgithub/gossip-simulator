@@ -200,7 +200,6 @@ defmodule Proj2.Topology do
     |> honeycomb()
     |> Enum.map(fn {x, y} -> {x, [Enum.random(nodes)] ++ y} end)
   end
-  ## Helper functions
   
   defp add_edges(nodes), do: Enum.map(nodes, &({&1, []}))
   

@@ -13,6 +13,7 @@ defmodule Proj2.NetworkManager do
   """
   def start_link(args \\ []) do
     DynamicSupervisor.start_link(__MODULE__, args, name: __MODULE__)
+    # IO.inspect self()
   end
   
   @doc """
@@ -91,26 +92,31 @@ defmodule Proj2.NetworkManager do
     # |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
   end
   
-  def reset(module, data) do
-    nodes =
-	  DynamicSupervisor.which_children(__MODULE__)
-	    |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
-	:ok =
-	  Task.async_stream(nodes, Node, :stop, [])
-	    |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
-    Process.sleep(Application.get_env(:proj2, :delay) * 3)  # Make sure all :transmit messages are cleared
-	Enum.map(data, &(apply(module, :init, &1)))
-	  |> Enum.zip(nodes)
-	  |> Task.async_stream(fn {data, node} -> Node.reset(node, data) end)
-	  |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
-  end
+  # def reset(module, data) do
+  #   nodes =
+	#   DynamicSupervisor.which_children(__MODULE__)
+	#     |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
+	# :ok =
+	#   Task.async_stream(nodes, Node, :stop, [])
+	#     |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
+  #   Process.sleep(Application.get_env(:proj2, :delay) * 3)  # Make sure all :transmit messages are cleared
+	# Enum.map(data, &(apply(module, :init, &1)))
+	#   |> Enum.zip(nodes)
+	#   |> Task.async_stream(fn {data, node} -> Node.reset(node, data) end)
+	#   |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
+  # end
   
-  def kill_children() do
-    DynamicSupervisor.which_children(__MODULE__)
-	  |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
-	  |> Task.async_stream(fn pid -> DynamicSupervisor.terminate_child(__MODULE__, pid) end)
-	  |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
-  end
+  # def kill_children() do
+  #   DynamicSupervisor.which_children(__MODULE__)
+	#   |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
+	#   |> Task.async_stream(fn pid -> DynamicSupervisor.terminate_child(__MODULE__, pid) end)
+	#   # |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
+
+  #   # DynamicSupervisor.which_children(__MODULE__)
+	#   # |> Enum.map(fn {:undefined, pid, _type, _modules} -> pid end)
+	#   # |> Task.async_stream(fn pid -> DynamicSupervisor.terminate_child(__MODULE__, pid) end)
+	#   # |> Enum.reduce(:ok, fn {:ok, :ok}, :ok -> :ok end)
+  # end
   
   ## Server Callbacks
   

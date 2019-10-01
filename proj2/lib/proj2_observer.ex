@@ -61,39 +61,75 @@ defmodule Proj2.Observer do
   @doc """
   Record convergence of monitored nodes.
   """
+  #TY
   @impl true
   def handle_cast({:converged, pid, datum}, %{pids: pids} = state) do
+    # Map.put(state, :data, [datum])
+    # Map.put(pids, pid, :converged)
+    # Map.put(state, :pids, pids)
+    # Map.update!(state, :data, fn data -> [datum] ++ data end)
+    # IO.inspect state
     {:noreply,
-	  Map.put(state, :pids, Map.put(pids, pid, :converged))
-	    |> Map.update!(:data, &([datum] ++ &1)),
+	  Map.put(state, :data, [datum] ++ Map.get(state, :date))
+	    |> Map.put(:pids, Map.put(pids, pid, :converged)),
 	 {:continue, :check_convergence}}
+   
+
+  #   {:noreply,
+	#   Map.update!(state, :data, fn data -> [datum] ++ data end)
+	#     |> Map.put(:pids, Map.put(pids, pid, :converged)),
+	#  {:continue, :check_convergence}}
+
+  #   {:noreply,
+	#   Map.put(state, :pids, Map.put(pids, pid, :converged))
+	#     |> Map.update!(:data, fn data -> [datum] ++ data end),
+	#  {:continue, :check_convergence}}
   end
   
   @doc """
   Handle timeout while waiting for convergence.
   """
+  #TY
   @impl true
   def handle_info(:timeout, %{from: from} = state) do
-    send(from, :timeout)
-	{:noreply, state}
+    # IO.inspect from
+    # send(from, :timeout)
+	{:noreply, send(from, :timeout), state}
   end
   
   @doc """
   Check complete convergence of monitored nodes.
   """
+  # TY
   @impl true
   def handle_continue(:check_convergence, %{pids: pids, from: from, data: data} = state) do
-    if converged?(Map.values(pids)) do
-	  send from, {:converged,
-	               data,
-	               Task.async_stream(Map.keys(pids), &(Proj2.GossipNode.get(&1, :sent, :infinity)), timeout: 10*length(Map.keys(pids)))
-				     |> Enum.map(fn {:ok, n} -> n end)
-	                 |> Enum.sum()}
-	end
+    values = Map.values(Map.get(state, :pids))
+    con = ifConverged(values)
+    if con do
+	  send from, {:converged, data,
+	               Task.async_stream(Map.keys(pids), fn pid -> Proj2.GossipNode.get(pid, :sent, :infinity) end)
+				     |> Enum.reduce(0, fn {:ok, n}, acc -> n + acc end)}
+                # Task.async_stream(Map.keys(pids), fn pid -> Proj2.GossipNode.get(pid, :sent, :infinity) end, timeout: 10*length(Map.keys(pids)))
+            #  |> Enum.map(fn {:ok, n} -> n end)
+	          #        |> Enum.sum()}
+	  end
+
 	{:noreply, state, 10_000}
   end
   
-  defp converged?(nodes) when length(nodes) == 0, do: :true
+  # defp converged?(nodes) when length(nodes) == 0, do: :true
   
-  defp converged?(nodes), do: (if hd(nodes) == :converged, do: converged?(tl(nodes)), else: :false)
+  # defp converged?(nodes), do: (if hd(nodes) == :converged, do: converged?(tl(nodes)), else: :false)
+#TY
+  defp ifConverged([head | tail]) do
+    if head == :converged do
+      ifConverged(tail)
+    else
+      :false
+    end
+  end
+
+  defp ifConverged([]) do
+    :true
+  end
 end
