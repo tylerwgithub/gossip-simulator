@@ -31,6 +31,7 @@ defmodule Proj2.GossipNode do
   Tell a GossipNode to transmit its gossip to a random neighbor.
   """
   def transmit(node) do
+    IO.inspect node
     send node, :transmit
   end
   

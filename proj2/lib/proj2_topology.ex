@@ -99,11 +99,11 @@ defmodule Proj2.Topology do
     #|> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
   end
 
-  # def honeyrand(nodes, mod \\ :false, rand \\ :false) do
-  #   honey(nodes, mod, rand)
-  #   |> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
-  # end
-  ## Helper functions
+  def honeyrand(nodes, mod \\ :false, rand \\ :false) do
+    honey(nodes, mod, rand)
+    |> Enum.map(fn {x, y} -> {x, y ++ [Enum.random(nodes--[x])]} end)
+  end
+  # Helper functions
   
   defp add_neighbors(nodes), do: Enum.map(nodes, &({&1, []}))
   
@@ -231,4 +231,4 @@ defmodule Proj2.Topology do
 
 end
 
-Proj2.Topology.test()
+# Proj2.Topology.test()
