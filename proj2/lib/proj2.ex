@@ -11,7 +11,7 @@ defmodule Proj2 do
       case topology do
         "full"   -> &Proj2.Topology.full/1
         "line"   -> &(Proj2.Topology.grid(&1, 1))
-        "rand2D" -> &(Proj2.Topology.rand2d(&1, 2, 0.1))
+        "rand2D" -> &(Proj2.Topology.rand2d(&1, 0.1))
         "3Dtorus"     -> &(Proj2.Topology.grid(&1, 3))
         "honeycomb" -> &(Proj2.Topology.honeycomb(&1))
         "randhoneycomb" -> &(Proj2.Topology.randhoneycomb(&1))
@@ -31,7 +31,7 @@ defmodule Proj2 do
       case topology do
         "full"   -> &Proj2.Topology.full/1
         "line"   -> &(Proj2.Topology.grid(&1, 1))
-        "rand2D" -> &(Proj2.Topology.rand2d(&1, 2, 0.1))
+        "rand2D" -> &(Proj2.Topology.rand2d(&1, 0.1))
         "3Dtorus"     -> &(Proj2.Topology.grid(&1, 3))
         "honeycomb" -> &(Proj2.Topology.honeycomb(&1))
         "randhoneycomb" -> &(Proj2.Topology.randhoneycomb(&1))
