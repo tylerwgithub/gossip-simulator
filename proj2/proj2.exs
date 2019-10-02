@@ -1,6 +1,5 @@
 {numNodes, topology, algorithm} = {String.to_integer(hd(System.argv)), Enum.at(System.argv, 1), Enum.at(System.argv, 2)}
 
-Process.flag :trap_exit, true
 Proj2.NetworkManager.start_link()
 Proj2.Observer.start_link(self())
 # IO.inspect Proj2.Messenger
@@ -14,7 +13,7 @@ Proj2.Observer.start_link(self())
 
 # IO.inspect nodes
 
-case {algorithm, Proj2.test_run(nodes, topology, algorithm)} do
+case {algorithm, Proj2.checkConvergence(nodes, topology, algorithm)} do
   {"gossip", {:ok, count}}               -> IO.puts "Converged after #{count} messages."
   {"push-sum", {:ok, count, {min, max}}} -> IO.puts "Converged within (#{min}, #{max}) after #{count} messages."
   {_, :timeout}                          -> IO.puts "Timed out without converging."

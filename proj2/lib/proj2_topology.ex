@@ -1,60 +1,28 @@
 defmodule Proj2.Topology do
-  @moduledoc """
-  Documentation for Proj2.Topology
 
-  The functions in this module define various network topologies.
-  Each function takes a list of nodes as input, and outputs a list of tuples in the form {node, neighbors}.
-  """
-
-  @doc """
-  Defines a fully-connected network, where each node is a neighbor of every other node.
-  """
   #TY
   def full(nodes) do
     # IO.inspect nodes
     nodes |> Enum.map(fn x -> {x, nodes -- [x]} end)
-    # topo = nodes
-	  # |> Enum.map_reduce({[], tl(nodes)}, fn node, {head, tail} -> {{node, head ++ tail}, {[node] ++ head, Enum.drop(tail, 1)}} end)
 	  # |> elem(0)
     # IO.inspect
   end
 
 
-  @doc """
-  Defines a randomized 2D proximity network, where neighbors are nodes within the defined radius.
-  
-  ## Parameters
-    - d:    Number of dimensions in the network space.
-    - r:    Proximity radius to use for determining neighbors, must be less than 1.
-    - dist: Distribution to use when assigning coordinates to nodes. Possible values:
-              - uniform: Uniform random distribution (default).
-              - equal:   Equidistant (non-random) distribution.
-  """
+
   def rand2d(nodes, radius) do
     nodes
 	  |> add_edges()
 	  |> Enum.zip(get_2dcoords(length(nodes)))
 	  |> Enum.sort(&(hd(elem(&1, 1)) <= hd(elem(&2, 1))))
 	  |> find_nearby(radius)
-    |> IO.inspect
 	  |> Enum.reverse()
-    |> IO.inspect
 	  |> find_nearby(radius)
-    |> IO.inspect
 	  |> Enum.map(&(elem(&1, 0)))
   end
 
   
 
-  @doc """
-  Defines an orthogonal grid network in d dimensions.
-  The dimensional root of the number of nodes need not be an integer, although this may create a strange topology when using circular dimensions.
-  
-  ## Parameters
-    - d:    Dimensionality of the grid. For example d = 1 creates a line, d = 3 creates a cube, and d > 3 creates a hypercube.
-    - mod:  Flag to indicate if dimensions are circular i.e. they wrap around. Defaults to :false.
-    - rand: Flag to indicate if random pairwise connections should be added to the grid. Defaults to :false.
-  """
   def grid(nodes, d, mod \\ :false) do
     connect_grid(
       add_edges(nodes),
@@ -69,16 +37,10 @@ defmodule Proj2.Topology do
   end
 
   def honeycomb(nodes) do
-    IO.inspect nodes
     side = ceil(:math.sqrt(length(nodes)))
     side = if rem(side, 2) == 0, do: side + 1, else: side
 
     adjacencyList = honeycombUtil(side * side)
-    ret = Enum.fetch(nodes, 2)
-    case ret do
-     {:ok, pid} -> IO.inspect pid
-     _ -> 
-     end
     Enum.map(adjacencyList, fn {node, list} -> 
         {
         case Enum.fetch(nodes, node-1) do
@@ -97,7 +59,6 @@ defmodule Proj2.Topology do
   end
 
   def randhoneycomb(nodes) do
-    IO.inspect nodes
     side = ceil(:math.sqrt(length(nodes)))
     side = if rem(side, 2) == 0, do: side + 1, else: side
 
@@ -123,8 +84,6 @@ defmodule Proj2.Topology do
   end
 
   def honeycomb2(nodes) do
-  side = ceil(:math.sqrt(length(nodes)))
-  side = if rem(side, 2) == 0, do: side + 1, else: side
     listNodes = nodes 
     |> add_edges()
     |> Enum.zip(1..length(nodes))
@@ -135,30 +94,29 @@ defmodule Proj2.Topology do
             ret = Enum.fetch(listNodes, x-1)
             case ret do
               {:ok, {{addNeighbor, _}, _}} -> {{node, [addNeighbor] ++ neighbors}, x}
-              _ ->
+              _ -> {{node, neighbors}, x}
             end
           else
             ret = Enum.fetch(listNodes, x+1)
             case ret do
               {:ok, {{addNeighbor, _}, _}} -> {{node, [addNeighbor] ++ neighbors}, x}
-              _ ->
+              _ -> {{node, neighbors}, x}
             end
           end
           ret = Enum.fetch(listNodes, x-5)
           case ret do
             {:ok, {{addNeighbor, _}, _}} -> {{node, [addNeighbor] ++ neighbors}, x}
-            _ ->
+            _ -> {{node, neighbors}, x}
           end
           ret = Enum.fetch(listNodes, x+5)
           case ret do
             {:ok, {{addNeighbor, _}, _}} -> {{node, [addNeighbor] ++ neighbors}, x}
-            _ ->
+            _ -> {{node, neighbors}, x}
           end
           
          
          end)
     #|> Enum.unzip()
-    |> IO.inspect
     #     else 
     #       {x, [(if rem(x, side) > 0, do: x+1),
     #                 (if x+side <= side*side, do: x+side),
@@ -282,42 +240,17 @@ defmodule Proj2.Topology do
 		  |> elem(0)
 		 end)
   end
-  
-  defp randomize(nodes, rand) when rand do
-    nodes
-	  |> Enum.shuffle()
-	  |> pair_up([])
-  end
-  
-  defp randomize(nodes, _rand), do: nodes
-  
-  defp pair_up(nodes, pairs) when length(nodes) < 2, do: pairs ++ nodes
-  
-  defp pair_up(nodes, pairs) when length(nodes) == 2 do
-    if elem(Enum.at(nodes, 1), 0) in elem(Enum.at(nodes, 0), 1) do
-	  pairs ++ nodes
-	else
-	  pair_up(Enum.drop(nodes, 2), connect_line(Enum.take(nodes, 2), nil) ++ pairs)
-	end
-  end
-  
-  defp pair_up(nodes, pairs) do
-	if elem(Enum.at(nodes, 1), 0) in elem(Enum.at(nodes, 0), 1) do
-	    pair_up(Enum.shuffle(nodes), pairs)
-	else
-	    pair_up(Enum.drop(nodes, 2), connect_line(Enum.take(nodes, 2), nil) ++ pairs)
-	end
-  end
 
   def test do
     #IO.inspect honey([{1, []}, {2, []}, {3, []}, {4, []}], :false)
     #IO.inspect rand2d([1, 2, 3, 4, 5], 2, 0.5)
     #IO.inspect connect_line([{1, []}, {2, []}, {3, []}, {4, []}], :false)
-    IO.inspect honeycomb([1,2,3,4,5])
+    #IO.inspect honeycomb([1,2,3,4,5])
     # IO.inspect full([1,2,3,4,5])
     # IO.inspect grid([1,2,3,4,5], 1)
     #IO.inspect Enum.chunk_every([1,2,3,4,5,6,1], 2)
+    IO.inspect connect_grid([{1,[]},{2,[]},{3,[]},{4,[]},{5,[]},{6,[]},{7,[]},{8,[]}], calc_dimensions(8, 3), :false)
   end
 end
 
-#Proj2.Topology.test()
+Proj2.Topology.test()

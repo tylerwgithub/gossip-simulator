@@ -21,7 +21,7 @@ defmodule My_program do
 
     # IO.inspect nodes
 
-    case {algorithm, Proj2.test_run(nodes, topology, algorithm)} do
+    case {algorithm, Proj2.checkConvergence(nodes, topology, algorithm)} do
     {"gossip", {:ok, count}}               -> IO.puts "Converged after #{count} messages."
     {"push-sum", {:ok, count, {min, max}}} -> IO.puts "Converged within (#{min}, #{max}) after #{count} messages."
     {_, :timeout}                          -> IO.puts "Timed out without converging."
