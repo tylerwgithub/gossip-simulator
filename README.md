@@ -17,12 +17,12 @@ Gossip:
 
 Topology | Size | Messages to convergence
 --- | ---:| ---:
-Full | 16,384 | 330,318
-Line | 4,096 | 2,195,643
-Rand2D | 32,768 | 889,462
-3Dtorus | 16,384 | 5,185,458
-Honeycomb
-Randhoneycomb
+Full | 16384 | 359373
+Line | 4096 | 2212317
+Rand2D | 16384 | 370808
+3Dtorus | 16384 | 6237405
+Honeycomb | 16384 | 6293364
+Randhoneycomb | 16384 | 2093724
 
 
 
@@ -30,9 +30,9 @@ Push-Sum:
 
 Topology | Size | Messages to convergence
 --- | ---:| ---:
-Full | 10,000 | 478,433
-Line | 1,024 | 110,897
-Rand2D | 16,384 | 727,928
-3Dtorus | 32,768 | 2,543,005
-Honeycomb
-Randhoneycomb
+Full | 10000 | 461912
+Line | 1024 | 121469
+Rand2D | 16384 | 736094
+3Dtorus | 16384 | 1340708
+Honeycomb | 16384 | 1595401
+Randhoneycomb | 16384 | 1122944
